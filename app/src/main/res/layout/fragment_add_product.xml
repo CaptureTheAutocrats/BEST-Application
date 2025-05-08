@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:spacing="16dp">
+
+        <!-- Product Name Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="true">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Product Name"
+                android:inputType="textPersonName"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Product Description Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="true">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Description"
+                android:inputType="textMultiLine"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Product Price Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="true">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Price"
+                android:inputType="numberDecimal"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Stock Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="true">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editStock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Stock"
+                android:inputType="number"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Product Condition Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hintEnabled="true">
+
+            <RadioGroup
+                android:id="@+id/radioGroupCondition"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- New Condition Radio Button -->
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/radioNew"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="New"
+                    android:checked="true"/>
+
+                <!-- Used Condition Radio Button -->
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/radioUsed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Used" />
+
+            </RadioGroup>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Select Image Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select Image"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"/>
+
+        <!-- Image Preview -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imagePreview"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:scaleType="centerCrop"/>
+
+        <!-- Upload Product Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUpload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload Product"
+            app:cornerRadius="8dp"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"/>
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressIndicatorUpload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:indeterminate="true"
+            app:indicatorSize="48dp"
+            app:trackThickness="4dp"
+            app:layout_constraintTop_toBottomOf="@id/btnSignup"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
