@@ -97,15 +97,6 @@
             </RadioGroup>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Select Image Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSelectImage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Select Image"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"/>
-
         <!-- Image Preview -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imagePreview"
@@ -113,7 +104,8 @@
             android:layout_height="300dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerInside"
+            />
 
         <!-- Upload Product Button -->
         <com.google.android.material.button.MaterialButton

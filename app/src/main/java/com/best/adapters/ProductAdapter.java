@@ -29,10 +29,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
+
         Product product = productList.get(position);
         holder.name.setText(product.name);
-        holder.price.setText("Price: $" + product.price);
+        holder.price.setText("Price: " + product.price + " BDT");
         holder.condition.setText("Condition: " + product.product_condition);
+        holder.stock.setText("Stock: " + product.stock);
 
         // Fix: prepend full base URL to relative path
         String imageUrl = "https://catchmeifyoucan.xyz/best/" + product.image_path;
@@ -53,6 +55,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         TextView  name;
         TextView  price;
         TextView  condition;
+        TextView  stock;
         ImageView imageView;
 
         public ProductViewHolder(@NonNull View itemView) {
@@ -61,6 +64,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             price       = itemView.findViewById(R.id.txtPrice);
             condition   = itemView.findViewById(R.id.txtCondition);
             imageView   = itemView.findViewById(R.id.imageProduct);
+            stock       = itemView.findViewById(R.id.txtStock);
         }
     }
 }

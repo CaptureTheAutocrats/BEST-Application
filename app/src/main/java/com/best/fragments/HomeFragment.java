@@ -61,10 +61,12 @@ public class HomeFragment extends Fragment {
                             Product product             = new Product();
                             product.product_id          = jsonObject.getString("product_id");
                             product.name                = jsonObject.getString("name");
-                            product.price               = jsonObject.getString("price");
+                            product.price               = jsonObject.getInt("price");
                             product.product_condition   = jsonObject.getString("product_condition");
+                            product.stock               = jsonObject.getInt("stock");
                             product.image_path          = jsonObject.getString("image_path");
                             productList.add(product);
+                            //Log.d("HomeFragment", jsonObject.toString());
                         }
 
                         requireActivity().runOnUiThread(() -> adapter.notifyDataSetChanged());

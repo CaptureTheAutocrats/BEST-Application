@@ -12,13 +12,15 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:padding="5dp"
             android:id="@+id/imageProduct"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background"/>
+            android:scaleType="fitCenter"
+            android:src="@drawable/image_placeholder"/>
 
         <LinearLayout
+            android:layout_gravity="center"
             android:orientation="vertical"
             android:paddingStart="12dp"
             android:layout_width="0dp"
@@ -26,6 +28,7 @@
             android:layout_weight="1">
 
             <TextView
+                android:text="Name"
                 android:id="@+id/txtName"
                 android:textStyle="bold"
                 android:textSize="16sp"
@@ -33,14 +36,33 @@
                 android:layout_height="wrap_content" />
 
             <TextView
+                android:text="Price"
                 android:id="@+id/txtPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <TextView
+                android:text="Condition"
                 android:id="@+id/txtCondition"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="Stock"
+                android:id="@+id/txtStock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+
         </LinearLayout>
+
+        <Button
+            android:layout_margin="5dp"
+            android:text="Add to Cart"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
     </LinearLayout>
+
 </androidx.cardview.widget.CardView>

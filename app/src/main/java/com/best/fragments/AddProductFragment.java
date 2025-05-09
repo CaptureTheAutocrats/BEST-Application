@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +35,6 @@ public class AddProductFragment extends Fragment {
     EditText    editPrice;
     EditText    editStock;
     RadioGroup  radioGroupCond;
-    Button      btnSelectImage;
     Button      btnUpload;
     ImageView   imagePreview;
     Bitmap      selectedBitmap;
@@ -54,15 +54,16 @@ public class AddProductFragment extends Fragment {
         editPrice           = view.findViewById(R.id.editPrice);
         radioGroupCond      = view.findViewById(R.id.radioGroupCondition);
         editStock           = view.findViewById(R.id.editStock);
-        btnSelectImage      = view.findViewById(R.id.btnSelectImage);
         btnUpload           = view.findViewById(R.id.btnUpload);
         imagePreview        = view.findViewById(R.id.imagePreview);
         progressIndicator   = view.findViewById(R.id.progressIndicatorUpload);
 
         sessionManager  = new SessionManager(requireContext());
 
-        btnSelectImage.setOnClickListener(v -> selectImage());
         btnUpload.setOnClickListener(v -> uploadProduct());
+
+        imagePreview.setImageResource(R.drawable.image_placeholder);
+        imagePreview.setOnClickListener(v->selectImage());
 
         return view;
     }
@@ -78,10 +79,21 @@ public class AddProductFragment extends Fragment {
         if (requestCode == REQUEST_IMAGE_PICK && resultCode == Activity.RESULT_OK && data != null) {
             Uri uri = data.getData();
             try {
+
+                // Get image size in bytes
+                long imageSizeInBytes = requireActivity().getContentResolver()
+                        .openAssetFileDescriptor(uri, "r")
+                        .getLength();
+
+                if (imageSizeInBytes > 1024 * 1024) { // 1 MB
+                    Toast.makeText(getContext(), "Image must be under 1 MB", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 selectedBitmap = MediaStore.Images.Media.getBitmap(requireActivity().getContentResolver(), uri);
                 imagePreview.setImageBitmap(selectedBitmap);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.d("AddProductFragment","Image Selection: " + e.toString());
             }
         }
     }
@@ -108,6 +120,8 @@ public class AddProductFragment extends Fragment {
             Toast.makeText(getContext(), "Select an image first", Toast.LENGTH_SHORT).show();
             return;
         }
+
+
 
         requireActivity().runOnUiThread(()-> progressIndicator.setVisibility(View.VISIBLE));
 
@@ -150,6 +164,8 @@ public class AddProductFragment extends Fragment {
                     progressIndicator.setVisibility(View.INVISIBLE);
                     if (response.code() == 201) {
                         Toast.makeText(getContext(), "Product added", Toast.LENGTH_SHORT).show();
+                        // Clear all fields after successful upload
+                        clearFields();
                     }
                     else if (response.code() == 401) {
                         Toast.makeText(getContext(), "Session expired", Toast.LENGTH_SHORT).show();
@@ -160,5 +176,18 @@ public class AddProductFragment extends Fragment {
                 });
             }
         });
+    }
+
+    // Helper method to clear fields
+    private void clearFields() {
+        editName.setText("");
+        editDescription.setText("");
+        editPrice.setText("");
+        editStock.setText("");
+        radioGroupCond.clearCheck(); // Deselect any radio buttons
+
+        // Clear the selected image and reset image preview
+        selectedBitmap = null;
+        imagePreview.setImageResource(R.drawable.image_placeholder); // Use a placeholder or clear it
     }
 }
