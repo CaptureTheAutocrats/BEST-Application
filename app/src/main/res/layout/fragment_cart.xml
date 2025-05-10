@@ -4,31 +4,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".fragments.CartFragment">
 
-    <LinearLayout
-        android:layout_marginBottom="85dp"
+    <!-- Wrap LinearLayout inside SwipeRefreshLayout to enable pull-to-refresh -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/CartSwipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:paddingTop="12dp">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerCart"
+        <LinearLayout
+            android:layout_marginBottom="85dp"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="12dp"
-            />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/CartBtnOrder"
-            android:text="Order"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="50dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
-            />
-    </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerCart"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="12dp"
+                />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/CartBtnOrder"
+                android:text="Order"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="50dp"
+                android:layout_marginLeft="50dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                />
+        </LinearLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </FrameLayout>

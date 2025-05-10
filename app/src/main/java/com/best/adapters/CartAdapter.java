@@ -12,9 +12,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.best.R;
 import com.best.models.Cart;
 import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
 import java.util.List;
+import okhttp3.*;
+
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
+
+    private static final String API_URL = "https://catchmeifyoucan.xyz/best/api/cart.php";
+    private static final MediaType JSON = MediaType.get("application/json");
+    private static final OkHttpClient client = new OkHttpClient();
+    private static boolean isUpdating   = false;
 
     private List<Cart> cartList;
 
@@ -50,22 +59,28 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         // Handle MORE button
         holder.more.setOnClickListener(v -> {
-            cart.quantity += 1;
-            notifyItemChanged(position);
-        });
-
-        // Handle LESS button
-        holder.less.setOnClickListener(v -> {
-            if (cart.quantity > 1) {
-                cart.quantity -= 1;
+            if ( !isUpdating ){
+                cart.quantity += 1;
                 notifyItemChanged(position);
             }
         });
 
+        // Handle LESS button
+        holder.less.setOnClickListener(v -> {
+            if ( !isUpdating ){
+                if (cart.quantity > 1) {
+                    cart.quantity -= 1;
+                    notifyItemChanged(position);
+                }
+            }
+        });
+
         holder.delete.setOnClickListener(v -> {
-            cartList.remove(position);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, cartList.size());
+            if ( !isUpdating ){
+                cartList.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, cartList.size());
+            }
         });
 
 
@@ -100,6 +115,36 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             more        = itemView.findViewById(R.id.CartBtnMore);
             less        = itemView.findViewById(R.id.CartBtnLess);
             delete      = itemView.findViewById(R.id.CartBtnDelete);
+        }
+    }
+
+
+    public String patchRequest(String url, String jsonBody) throws Exception {
+        RequestBody body = RequestBody.create(jsonBody, JSON);
+        Request request = new Request.Builder()
+                .url(url)
+                .method("PATCH", body)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+            return response.body().string();
+        }
+    }
+
+    public String deleteRequest(String url) throws Exception {
+        Request request = new Request.Builder()
+                .url(url)
+                .delete()
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+            return response.body().string();
         }
     }
 }

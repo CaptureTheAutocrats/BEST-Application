@@ -3,6 +3,7 @@ package com.best.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -19,7 +20,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     private OnItemClickListener listener; // Interface to handle clicks
 
     public interface OnItemClickListener {
-        void onItemClick(Product product);
+        void onItemClick(View view, Product product);
     }
 
     public ProductAdapter(List<Product> list, OnItemClickListener listener) {
@@ -53,7 +54,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 .into(holder.imageView);
 
         // Set item click listener
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(product));
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(v,product));
+        holder.addToCartBtn.setOnClickListener(v->listener.onItemClick(v,product));
     }
 
     @Override
@@ -67,14 +69,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         TextView  condition;
         TextView  stock;
         ImageView imageView;
+        Button    addToCartBtn;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
-            name        = itemView.findViewById(R.id.txtName);
-            price       = itemView.findViewById(R.id.txtPrice);
-            condition   = itemView.findViewById(R.id.txtCondition);
-            imageView   = itemView.findViewById(R.id.imageProduct);
-            stock       = itemView.findViewById(R.id.txtStock);
+            name         = itemView.findViewById(R.id.txtName);
+            price        = itemView.findViewById(R.id.txtPrice);
+            condition    = itemView.findViewById(R.id.txtCondition);
+            imageView    = itemView.findViewById(R.id.imageProduct);
+            stock        = itemView.findViewById(R.id.txtStock);
+            addToCartBtn = itemView.findViewById(R.id.btnAddToCart);
         }
     }
 }

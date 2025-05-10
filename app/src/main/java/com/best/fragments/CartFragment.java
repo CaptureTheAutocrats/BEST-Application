@@ -31,15 +31,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-
-public class CartFragment extends Fragment  {
+public class CartFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private CartAdapter adapter;
     private List<Cart> cartList = new ArrayList<>();
     private final OkHttpClient client = new OkHttpClient();
-
-    SessionManager sessionManager;
+    private SessionManager sessionManager;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -47,7 +46,10 @@ public class CartFragment extends Fragment  {
 
         sessionManager  = new SessionManager(requireActivity().getApplicationContext());
         View view       = inflater.inflate(R.layout.fragment_cart, container, false);
-        recyclerView    = view.findViewById(R.id.recyclerCart);
+
+        // Initialize the SwipeRefreshLayout and RecyclerView
+        swipeRefreshLayout = view.findViewById(R.id.CartSwipeRefreshLayout);
+        recyclerView = view.findViewById(R.id.recyclerCart);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new CartAdapter(cartList);
         recyclerView.setAdapter(adapter);
@@ -55,7 +57,10 @@ public class CartFragment extends Fragment  {
         Button btnOrder = view.findViewById(R.id.CartBtnOrder);
         btnOrder.setOnClickListener(v -> openOrderFragment());
 
-        fetchCarts();
+        // Set SwipeRefreshLayout listener
+        swipeRefreshLayout.setOnRefreshListener(this::fetchCarts);
+
+        fetchCarts(); // Fetch the cart items initially
 
         return view;
     }
@@ -63,6 +68,9 @@ public class CartFragment extends Fragment  {
     private void fetchCarts() {
 
         Log.d("Cart", "Fetching cart");
+
+        // Show the refresh spinner
+        swipeRefreshLayout.setRefreshing(true);
 
         Request request = new Request.Builder()
                 .url("https://catchmeifyoucan.xyz/best/api/cart.php")
@@ -74,6 +82,7 @@ public class CartFragment extends Fragment  {
             @Override public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
                 Log.e("Cart", e.toString());
+                swipeRefreshLayout.setRefreshing(false); // Hide the refresh spinner on failure
             }
 
             @Override public void onResponse(Call call, Response response) throws IOException {
@@ -88,7 +97,7 @@ public class CartFragment extends Fragment  {
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject cartJsonObject = jsonArray.getJSONObject(i);
 
-                            Cart  cart = new Cart ();
+                            Cart cart = new Cart();
                             cart.product = new Product();
 
                             cart.cart_item_id = cartJsonObject.getInt("cart_item_id");
@@ -97,42 +106,43 @@ public class CartFragment extends Fragment  {
                             cart.quantity     = cartJsonObject.getInt("quantity");
                             cart.updated_at   = cartJsonObject.getString("updated_at");
 
-                            JSONObject productJsonObject    = cartJsonObject.getJSONObject("product");
-                            cart.product.product_id         = productJsonObject.getString("product_id");
-                            cart.product.name               = productJsonObject.getString("name");
-                            cart.product.description        = productJsonObject.getString("description");
-                            cart.product.price              = productJsonObject.getInt("price");
-                            cart.product.product_condition  = productJsonObject.getString("product_condition");
-                            cart.product.stock              = productJsonObject.getInt("stock");
-                            cart.product.image_path         = productJsonObject.getString("image_path");
+                            JSONObject productJsonObject = cartJsonObject.getJSONObject("product");
+                            cart.product.product_id = productJsonObject.getString("product_id");
+                            cart.product.name = productJsonObject.getString("name");
+                            cart.product.description = productJsonObject.getString("description");
+                            cart.product.price = productJsonObject.getInt("price");
+                            cart.product.product_condition = productJsonObject.getString("product_condition");
+                            cart.product.stock = productJsonObject.getInt("stock");
+                            cart.product.image_path = productJsonObject.getString("image_path");
 
                             newCarts.add(cart);
                         }
 
                         requireActivity().runOnUiThread(() -> {
-                            cartList.addAll(newCarts);
+                            cartList.clear();  // Clear old data before updating
+                            cartList.addAll(newCarts); // Add new data
                             adapter.notifyDataSetChanged();
+                            swipeRefreshLayout.setRefreshing(false); // Hide the refresh spinner after data is loaded
                         });
 
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.e("Cart", e.toString());
+                        swipeRefreshLayout.setRefreshing(false); // Hide the refresh spinner on error
                     }
-                }
-                else{
+                } else {
                     Log.e("Cart", response.toString());
+                    swipeRefreshLayout.setRefreshing(false); // Hide the refresh spinner on error
                 }
             }
         });
     }
 
-    // This method will be triggered when the user clicks the checkout button
     private void openOrderFragment() {
-        // This will call the MainActivity's method to switch fragments
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).switchFragment(R.id.nav_orders);
             BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_nav);
-            bottomNav.setSelectedItemId(R.id.nav_orders);  // Set the "Orders" tab as selected
+            bottomNav.setSelectedItemId(R.id.nav_orders);
         }
     }
 }

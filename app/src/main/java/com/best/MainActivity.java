@@ -91,16 +91,17 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        new AlertDialog.Builder(this)
-                .setMessage("Are you sure you want to exit?")
-                .setCancelable(false)
-                .setPositiveButton("No", null)
-                .setNeutralButton("Yes", new DialogInterface.OnClickListener(){
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        MainActivity.super.onBackPressed();
-                    }
-                })
-                .show();
+        super.onBackPressed();
+//        new AlertDialog.Builder(this)
+//                .setMessage("Are you sure you want to exit?")
+//                .setCancelable(false)
+//                .setPositiveButton("No", null)
+//                .setNeutralButton("Yes", new DialogInterface.OnClickListener(){
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        MainActivity.super.onBackPressed();
+//                    }
+//                })
+//                .show();
     }
 }
