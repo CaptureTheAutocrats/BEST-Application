@@ -114,7 +114,7 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject productJsonObject = jsonArray.getJSONObject(i);
                             Product product = new Product();
-                            product.product_id = productJsonObject.getString("product_id");
+                            product.product_id = productJsonObject.getInt("product_id");
                             product.name = productJsonObject.getString("name");
                             product.description = productJsonObject.getString("description");
                             product.price = productJsonObject.getInt("price");

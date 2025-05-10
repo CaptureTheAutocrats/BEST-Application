@@ -1,11 +1,16 @@
 package com.best.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -42,6 +48,7 @@ public class CartFragment extends Fragment {
     private final OkHttpClient client = new OkHttpClient();
     private SessionManager sessionManager;
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout;
+    private static final MediaType JSON = MediaType.get("application/json");
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -51,17 +58,20 @@ public class CartFragment extends Fragment {
         View view       = inflater.inflate(R.layout.fragment_cart, container, false);
 
         // Initialize the SwipeRefreshLayout and RecyclerView
-        swipeRefreshLayout = view.findViewById(R.id.CartSwipeRefreshLayout);
-        recyclerView = view.findViewById(R.id.recyclerCart);
+        swipeRefreshLayout  = view.findViewById(R.id.CartSwipeRefreshLayout);
+        recyclerView        = view.findViewById(R.id.recyclerCart);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new CartAdapter(cartList, requireActivity().getApplicationContext());
+        adapter             = new CartAdapter(cartList, requireActivity().getApplicationContext());
         recyclerView.setAdapter(adapter);
 
         Button btnOrder = view.findViewById(R.id.CartBtnOrder);
-        btnOrder.setOnClickListener(v -> openOrderFragment());
+        btnOrder.setOnClickListener(v -> createOrder());
 
         // Set SwipeRefreshLayout listener
-        swipeRefreshLayout.setOnRefreshListener(this::fetchCarts);
+        swipeRefreshLayout.setOnRefreshListener(()->{
+            cartList.clear();
+            fetchCarts();
+        });
 
         fetchCarts(); // Fetch the cart items initially
 
@@ -110,7 +120,7 @@ public class CartFragment extends Fragment {
                             cart.updated_at   = cartJsonObject.getString("updated_at");
 
                             JSONObject productJsonObject = cartJsonObject.getJSONObject("product");
-                            cart.product.product_id = productJsonObject.getString("product_id");
+                            cart.product.product_id = productJsonObject.getInt("product_id");
                             cart.product.name = productJsonObject.getString("name");
                             cart.product.description = productJsonObject.getString("description");
                             cart.product.price = productJsonObject.getInt("price");
@@ -139,6 +149,82 @@ public class CartFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void createOrder(){
+
+        if ( cartList.size() <= 0 ){
+            requireActivity().runOnUiThread(()->{
+                Toast.makeText(getContext(), "Add items to cart before oreder", Toast.LENGTH_SHORT).show();
+            });
+            return;
+        }
+
+        new AlertDialog.Builder(getContext())
+        .setMessage("Are you sure you want to order?")
+        .setCancelable(false)
+        .setPositiveButton("No", null)
+        .setNeutralButton("Yes", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
+                    Request request = new Request.Builder()
+                            .url("https://catchmeifyoucan.xyz/best/api/orders.php")
+                            .post(body)
+                            .addHeader("Content-Type", "application/json")
+                            .addHeader("Authorization", "Bearer " + sessionManager.getToken())
+                            .build();
+
+                    client.newCall(request).enqueue(new Callback() {
+
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            requireActivity().runOnUiThread(()->{
+                                Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                            });
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+
+                            String responseBody = response.body().string();
+                            if (response.isSuccessful()) {
+                                try {
+                                    JSONObject resp = new JSONObject(responseBody);
+                                    String message = resp.getString("message");
+                                    int orders_created = resp.getInt("orders_created");
+                                    requireActivity().runOnUiThread(()->{
+                                        Toast.makeText(getContext(), orders_created + " " + message, Toast.LENGTH_SHORT).show();
+                                        cartList.clear();
+                                        fetchCarts();
+                                    });
+                                }
+                                catch (Exception e) {
+                                    requireActivity().runOnUiThread(()->{
+                                        Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                                    });
+                                }
+                            }
+                            else {
+                                requireActivity().runOnUiThread(()->{
+                                    Toast.makeText(getContext(), "Server error!", Toast.LENGTH_SHORT).show();
+                                });
+                            }
+
+                        }
+                    });
+
+                } catch (Exception e) {
+                    requireActivity().runOnUiThread(()->{
+                        Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        })
+        .show();
     }
 
     private void openOrderFragment() {

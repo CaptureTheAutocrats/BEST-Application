@@ -15,7 +15,7 @@
         <ImageView
 
             android:layout_gravity="center_vertical"
-            android:id="@+id/CartImageProduct"
+            android:id="@+id/OrderImageProduct"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:scaleType="fitCenter"
@@ -31,34 +31,29 @@
             android:paddingStart="12dp">
 
             <TextView
-                android:id="@+id/CartTxtName"
+                android:id="@+id/OrderTxtName"
                 android:text="Name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:text="Unit Price"
-                android:id="@+id/CartTxtUnitPrice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:text="Condition "
-                android:id="@+id/CartTxtCondition"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
 
             <TextView
                 android:text="Quantity "
-                android:id="@+id/CartTxtQuantity"
+                android:id="@+id/OrderTxtQuantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
             <TextView
                 android:text="Total Price "
-                android:id="@+id/CartTxtTotalPrice"
+                android:id="@+id/OrderTxtTotalPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="Status"
+                android:id="@+id/OrderTxtStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
@@ -76,44 +71,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center">
-
-                    <ImageButton
-                        app:tint="#4CAF50"
-                        android:layout_margin="2dp"
-                        android:id="@+id/CartBtnMore"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_more"
-                        android:contentDescription="Increase quantity" />
-
-                    <ImageButton
-                        app:tint = "#FFA000"
-                        android:layout_margin="2dp"
-                        android:id="@+id/CartBtnLess"
-                        android:layout_width="45dp"
-                        android:layout_height="45dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_less"
-                        android:contentDescription="Decrease quantity" />
-                </LinearLayout>
-
 
                 <ImageButton
                     app:tint="#F44336"
                     android:layout_gravity="center_horizontal"
                     android:layout_margin="2dp"
-                    android:id="@+id/CartBtnDelete"
+                    android:id="@+id/OrderBtnDelete"
                     android:layout_width="45dp"
                     android:layout_height="45dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_delete"
-                    android:contentDescription="Delete cart item" />
+                    android:contentDescription="Delete Order item" />
 
             </LinearLayout>
 

@@ -75,6 +75,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             if ( !isUpdating ){
                 cart.quantity += 1;
                 notifyItemChanged(position);
+                increaseCartItem(cartList.get(position).product.product_id);
             }
         });
 
@@ -84,10 +85,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 if (cart.quantity > 1) {
                     cart.quantity -= 1;
                     notifyItemChanged(position);
+                    decreaseCartItem(cartList.get(position).product.product_id);
                 }
             }
         });
 
+        // Handle Delete button
         holder.delete.setOnClickListener(v -> {
             if ( !isUpdating ){
 
@@ -99,7 +102,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
             }
         });
-
 
     }
 
@@ -135,23 +137,130 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
     }
 
+    public void increaseCartItem(int product_id) {
 
-    public String patchRequest(String url, String jsonBody) throws Exception {
-        RequestBody body = RequestBody.create(jsonBody, JSON);
-        Request request = new Request.Builder()
-                .url(url)
-                .method("PATCH", body)
-                .build();
+        try {
+            isUpdating = true;
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("product_id", product_id);
+            jsonObject.put("operation", "+");
 
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-            return response.body().string();
+            RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
+            Request request = new Request.Builder()
+                    .url("https://catchmeifyoucan.xyz/best/api/cart.php")
+                    .patch(body)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Bearer " + sessionManager.getToken())
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+                    });
+                    isUpdating = false;
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+
+                    String responseBody = response.body().string();
+                    if (response.isSuccessful()) {
+                        try {
+                            JSONObject resp = new JSONObject(responseBody);
+                            String message = resp.getString("message");
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                            });
+                            isUpdating = false;
+                        }
+                        catch (Exception e) {
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Toast.makeText(context, "Invalid response", Toast.LENGTH_SHORT).show();
+                            });
+                            isUpdating = false;
+                        }
+                    }
+                    else {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            Toast.makeText(context, "Server error", Toast.LENGTH_SHORT).show();
+                        });
+                        isUpdating = false;
+                    }
+
+                }
+            });
+
+        } catch (JSONException e) {
+            isUpdating = false;
+            throw new RuntimeException(e);
         }
     }
 
-    public void deleteCartItem(String product_id) {
+    public void decreaseCartItem(int product_id){
+        try {
+            isUpdating = true;
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("product_id", product_id);
+            jsonObject.put("operation", "-");
+
+            RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
+            Request request = new Request.Builder()
+                    .url("https://catchmeifyoucan.xyz/best/api/cart.php")
+                    .patch(body)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Bearer " + sessionManager.getToken())
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+                    });
+                    isUpdating = false;
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+
+                    String responseBody = response.body().string();
+                    if (response.isSuccessful()) {
+                        try {
+                            JSONObject resp = new JSONObject(responseBody);
+                            String message  = resp.getString("message");
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                            });
+                            isUpdating = false;
+                        }
+                        catch (Exception e) {
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Toast.makeText(context, "Invalid response", Toast.LENGTH_SHORT).show();
+                            });
+                            isUpdating = false;
+                        }
+                    }
+                    else {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            Toast.makeText(context, "Server error", Toast.LENGTH_SHORT).show();
+                        });
+                        isUpdating = false;
+                    }
+
+                }
+            });
+
+        } catch (JSONException e) {
+            isUpdating = false;
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteCartItem(int product_id) {
 
         try {
             isUpdating = true;
@@ -210,6 +319,5 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             isUpdating = false;
             throw new RuntimeException(e);
         }
-
     }
 }
