@@ -1,4 +1,7 @@
 package com.best.adapters;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,11 +10,17 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.best.R;
+import com.best.SessionManager;
 import com.best.models.Cart;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,14 +35,18 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private static boolean isUpdating   = false;
 
     private List<Cart> cartList;
+    private Context context;
+    private SessionManager sessionManager;
 
-    public CartAdapter(List<Cart> list) {
+    public CartAdapter(List<Cart> list, Context context) {
         this.cartList = list;
+        this.context = context;
     }
 
     @NonNull
     @Override
     public CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        sessionManager = new SessionManager(parent.getContext());
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cart, parent, false);
         return new CartViewHolder(view);
     }
@@ -77,9 +90,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         holder.delete.setOnClickListener(v -> {
             if ( !isUpdating ){
+
+                deleteCartItem(cartList.get(position).product.product_id);
+
                 cartList.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, cartList.size());
+
             }
         });
 
@@ -134,17 +151,65 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
     }
 
-    public String deleteRequest(String url) throws Exception {
-        Request request = new Request.Builder()
-                .url(url)
-                .delete()
-                .build();
+    public void deleteCartItem(String product_id) {
 
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-            return response.body().string();
+        try {
+            isUpdating = true;
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("product_id", product_id);
+
+            RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
+            Request request = new Request.Builder()
+                    .url("https://catchmeifyoucan.xyz/best/api/cart.php")
+                    .delete(body)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Bearer " + sessionManager.getToken())
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+                    });
+                    isUpdating = false;
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+
+                    String responseBody = response.body().string();
+                    if (response.isSuccessful()) {
+                        try {
+                            JSONObject resp = new JSONObject(responseBody);
+                            String message = resp.getString("message");
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                            });
+                            isUpdating = false;
+                        }
+                        catch (Exception e) {
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                Toast.makeText(context, "Invalid response", Toast.LENGTH_SHORT).show();
+                            });
+                            isUpdating = false;
+                        }
+                    }
+                    else {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            Toast.makeText(context, "Server error", Toast.LENGTH_SHORT).show();
+                        });
+                        isUpdating = false;
+                    }
+
+                }
+            });
+
+        } catch (JSONException e) {
+            isUpdating = false;
+            throw new RuntimeException(e);
         }
+
     }
 }

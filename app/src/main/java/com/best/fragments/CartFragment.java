@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.best.MainActivity;
 import com.best.R;
@@ -21,6 +22,7 @@ import com.best.models.Product;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class CartFragment extends Fragment {
@@ -51,7 +54,7 @@ public class CartFragment extends Fragment {
         swipeRefreshLayout = view.findViewById(R.id.CartSwipeRefreshLayout);
         recyclerView = view.findViewById(R.id.recyclerCart);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new CartAdapter(cartList);
+        adapter = new CartAdapter(cartList, requireActivity().getApplicationContext());
         recyclerView.setAdapter(adapter);
 
         Button btnOrder = view.findViewById(R.id.CartBtnOrder);
@@ -145,4 +148,5 @@ public class CartFragment extends Fragment {
             bottomNav.setSelectedItemId(R.id.nav_orders);
         }
     }
+
 }

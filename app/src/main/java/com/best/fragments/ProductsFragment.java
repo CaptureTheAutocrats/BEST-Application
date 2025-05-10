@@ -77,6 +77,7 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
         swipeRefreshLayout.setOnRefreshListener(() -> {
             // Reset the currentPage to 1 to start fetching from the first page again when refreshing
             currentPage = 1;
+            productList.clear();
             fetchProducts(currentPage);
         });
 
@@ -206,7 +207,9 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
                 });
 
             } catch (Exception e) {
-
+                requireActivity().runOnUiThread(()->{
+                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
             }
         }
         else{
