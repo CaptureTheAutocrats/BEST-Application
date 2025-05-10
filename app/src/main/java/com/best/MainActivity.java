@@ -1,6 +1,8 @@
 package com.best;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -8,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.best.fragments.AddProductFragment;
 import com.best.fragments.CartFragment;
+import com.best.fragments.OrdersFragment;
 import com.best.fragments.ProductsFragment;
 import com.best.fragments.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -42,19 +45,27 @@ public class MainActivity extends AppCompatActivity {
     // Create and keep fragments in memory.
     // Use add(), show(), and hide() instead of replace().
 
-    private void switchFragment(int itemId) {
+    public void switchFragment(int itemId) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         Fragment fragment = fragmentMap.get(itemId);
         if (fragment == null) {
+
             // Lazy creation and caching
+
             if ( itemId == R.id.nav_products ) {
                 fragment = new ProductsFragment();
-            } else if ( itemId == R.id.nav_cart ) {
+            }
+            else if ( itemId == R.id.nav_cart ) {
                 fragment = new CartFragment();
-            } else if ( itemId == R.id.nav_add ) {
+            }
+            else if ( itemId == R.id.nav_orders ) {
+                fragment = new OrdersFragment();
+            }
+            else if ( itemId == R.id.nav_add ) {
                 fragment = new AddProductFragment();
-            } else if ( itemId == R.id.nav_profile ) {
+            }
+            else if ( itemId == R.id.nav_profile ) {
                 fragment = new ProfileFragment();
             }
             if (fragment != null) {
@@ -75,5 +86,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         transaction.commit();
+    }
+
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure you want to exit?")
+                .setCancelable(false)
+                .setPositiveButton("No", null)
+                .setNeutralButton("Yes", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        MainActivity.super.onBackPressed();
+                    }
+                })
+                .show();
     }
 }

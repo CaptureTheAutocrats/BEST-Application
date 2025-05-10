@@ -78,15 +78,15 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
                         List<Product> newProducts = new ArrayList<>();
 
                         for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            JSONObject productJsonObject = jsonArray.getJSONObject(i);
                             Product product = new Product();
-                            product.product_id = jsonObject.getString("product_id");
-                            product.name = jsonObject.getString("name");
-                            product.description = jsonObject.getString("description");
-                            product.price = jsonObject.getInt("price");
-                            product.product_condition = jsonObject.getString("product_condition");
-                            product.stock = jsonObject.getInt("stock");
-                            product.image_path = jsonObject.getString("image_path");
+                            product.product_id = productJsonObject.getString("product_id");
+                            product.name = productJsonObject.getString("name");
+                            product.description = productJsonObject.getString("description");
+                            product.price = productJsonObject.getInt("price");
+                            product.product_condition = productJsonObject.getString("product_condition");
+                            product.stock = productJsonObject.getInt("stock");
+                            product.image_path = productJsonObject.getString("image_path");
                             newProducts.add(product);
                         }
 
@@ -106,7 +106,6 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
             }
         });
     }
-
 
     @Override
     public void onItemClick(Product product) {
