@@ -1,6 +1,8 @@
 package com.best.models;
 
-public class Product {
+import java.io.Serializable;
+
+public class Product implements Serializable {
     public String product_id;
     public int user_id;
     public String name;

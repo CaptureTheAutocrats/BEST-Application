@@ -129,7 +129,7 @@ public class AddProductFragment extends Fragment {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         selectedBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         String base64Image = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP);
-        String imageString = "data:image/png;base64," + base64Image;
+        String imageString = base64Image;
 
         JSONObject json = new JSONObject();
         try {
@@ -139,6 +139,7 @@ public class AddProductFragment extends Fragment {
             json.put("product_condition", condition);
             json.put("stock", Integer.parseInt(stock));
             json.put("image", imageString);
+            json.put("image_ext","png");
         } catch (Exception e) {
             e.printStackTrace();
         }

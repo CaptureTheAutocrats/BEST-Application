@@ -16,8 +16,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     private List<Product> productList;
 
-    public ProductAdapter(List<Product> list) {
+    private OnItemClickListener listener; // Interface to handle clicks
+
+    public interface OnItemClickListener {
+        void onItemClick(Product product);
+    }
+
+    public ProductAdapter(List<Product> list, OnItemClickListener listener) {
         this.productList = list;
+        this.listener = listener;
     }
 
     @NonNull
@@ -32,18 +39,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         Product product = productList.get(position);
         holder.name.setText(product.name);
-        holder.price.setText("Price: " + product.price + " BDT");
-        holder.condition.setText("Condition: " + product.product_condition);
-        holder.stock.setText("Stock: " + product.stock);
+        holder.price.setText("\uD83D\uDCB0 Price: " + product.price + " ৳");
+        holder.condition.setText("\uD83E\uDDFE Condition: " + product.product_condition);
+        holder.stock.setText("\uD83D\uDCE6 Stock: " + product.stock);
 
         // Fix: prepend full base URL to relative path
         String imageUrl = "https://catchmeifyoucan.xyz/best/" + product.image_path;
 
         Picasso.get()
                 .load(imageUrl)
-                .placeholder(R.drawable.ic_launcher_foreground)
-                .error(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.image_placeholder)
+                .error(R.drawable.image_placeholder)
                 .into(holder.imageView);
+
+        // Set item click listener
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(product));
     }
 
     @Override
