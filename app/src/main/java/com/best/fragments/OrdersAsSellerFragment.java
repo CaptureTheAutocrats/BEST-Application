@@ -2,18 +2,17 @@ package com.best.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.best.R;
 import com.best.SessionManager;
-import com.best.adapters.OrdersAdapter;
+import com.best.adapters.OrdersAsSellerAdapter;
 import com.best.models.Order;
 import com.best.models.Product;
 import com.best.models.User;
@@ -30,14 +29,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class OrdersFragment extends Fragment {
+public class OrdersAsSellerFragment extends Fragment {
 
 
-    private RecyclerView        recyclerView;
-    private OrdersAdapter       adapter;
-    private List<Order>         orderList = new ArrayList<>();
-    private final OkHttpClient  client = new OkHttpClient();
-    private SessionManager      sessionManager;
+    private RecyclerView            recyclerView;
+    private OrdersAsSellerAdapter   adapter;
+    private List<Order>             orderList   = new ArrayList<>();
+    private final OkHttpClient      client      = new OkHttpClient();
+    private SessionManager          sessionManager;
 
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout;
     private static final MediaType JSON = MediaType.get("application/json");
@@ -47,29 +46,29 @@ public class OrdersFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         sessionManager  = new SessionManager(requireActivity().getApplicationContext());
-        View view       = inflater.inflate(R.layout.fragment_orders, container, false);
+        View view       = inflater.inflate(R.layout.fragment_orders_as_seller, container, false);
 
         // Initialize the SwipeRefreshLayout and RecyclerView
-        swipeRefreshLayout  = view.findViewById(R.id.OrdersSwipeRefreshLayout);
-        recyclerView        = view.findViewById(R.id.recyclerOrders);
+        swipeRefreshLayout  = view.findViewById(R.id.OrdersAsSellerSwipeRefreshLayout);
+        recyclerView        = view.findViewById(R.id.recyclerOrdersAsSeller);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter             = new OrdersAdapter(orderList, requireActivity().getApplicationContext());
+        adapter             = new OrdersAsSellerAdapter(orderList, requireActivity().getApplicationContext());
         recyclerView.setAdapter(adapter);
 
         // Set SwipeRefreshLayout listener
         swipeRefreshLayout.setOnRefreshListener(()->{
             orderList.clear();
-            fetchOrders();
+            fetchOrdersAsSeller();
         });
 
-        fetchOrders(); // Fetch the Order items initially
+        fetchOrdersAsSeller(); // Fetch the Order items initially
 
         return view;
     }
 
-    private void fetchOrders() {
+    private void fetchOrdersAsSeller() {
 
-        Log.d("Order", "Fetching orders");
+        Log.d("Order As Seller", "Fetching orders as seller");
 
         // Show the refresh spinner
         swipeRefreshLayout.setRefreshing(true);
@@ -78,13 +77,15 @@ public class OrdersFragment extends Fragment {
         request = new Request.Builder()
                 .url("https://catchmeifyoucan.xyz/distributed-best/api/orders.php")
                 .addHeader("Authorization", "Bearer " + sessionManager.getToken())
+                .addHeader("IsAsSeller", "true")
                 .build();
+
 
         client.newCall(request).enqueue(new Callback() {
 
             @Override public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                Log.e("Order", e.toString());
+                Log.e("Order As Seller", e.toString());
                 swipeRefreshLayout.setRefreshing(false); // Hide the refresh spinner on failure
             }
 
@@ -92,16 +93,17 @@ public class OrdersFragment extends Fragment {
                 if (response.isSuccessful()) {
                     try {
 
-                        String responseStr      = response.body().string();
-                        JSONArray jsonArray     = new JSONArray(responseStr);
+                        String      responseStr = response.body().string();
+                        JSONArray   jsonArray   = new JSONArray(responseStr);
                         List<Order> newOrders   = new ArrayList<>();
 
                         for (int i = 0; i < jsonArray.length(); i++) {
+
                             JSONObject orderJsonObject = jsonArray.getJSONObject(i);
 
                             Order order = new Order();
                             order.product = new Product();
-                            order.seller  = new User();
+                            order.buyer  = new User();
 
                             order.order_id     = orderJsonObject.getInt("order_id");
                             order.buyer_id     = orderJsonObject.getInt("buyer_id");
@@ -123,10 +125,10 @@ public class OrdersFragment extends Fragment {
                             order.product.stock              = productJsonObject.getInt("stock");
                             order.product.image_path         = productJsonObject.getString("image_path");
 
-                            JSONObject sellerJsonObject     = orderJsonObject.getJSONObject("seller");
-                            order.seller.name               = sellerJsonObject.getString("name");
-                            order.seller.studentId          = sellerJsonObject.getString("student_id");
-                            order.seller.phoneNumber        = sellerJsonObject.getString("phone_number");
+                            JSONObject buyerJsonObject     = orderJsonObject.getJSONObject("buyer");
+                            order.buyer.name               = buyerJsonObject.getString("name");
+                            order.buyer.studentId          = buyerJsonObject.getString("student_id");
+                            order.buyer.phoneNumber        = buyerJsonObject.getString("phone_number");
 
                             newOrders.add(order);
                         }
@@ -140,11 +142,12 @@ public class OrdersFragment extends Fragment {
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Log.e("Order", e.toString());
+                        Log.e("Order As Seller", e.toString());
+                        Log.d("Order As Seller", response.body().toString());
                         swipeRefreshLayout.setRefreshing(false); // Hide the refresh spinner on error
                     }
                 } else {
-                    Log.e("Order", response.toString());
+                    Log.e("Order As Seller", response.toString());
                     swipeRefreshLayout.setRefreshing(false); // Hide the refresh spinner on error
                 }
             }

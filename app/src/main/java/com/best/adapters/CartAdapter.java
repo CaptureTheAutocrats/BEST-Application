@@ -11,17 +11,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.best.R;
 import com.best.SessionManager;
 import com.best.models.Cart;
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.List;
 import okhttp3.*;
@@ -29,7 +26,7 @@ import okhttp3.*;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
-    private static final String API_URL = "https://catchmeifyoucan.xyz/best/api/cart.php";
+    private static final String API_URL = "https://catchmeifyoucan.xyz/distributed-best/api/cart.php";
     private static final MediaType JSON = MediaType.get("application/json");
     private static final OkHttpClient client = new OkHttpClient();
     private static boolean isUpdating   = false;
@@ -62,7 +59,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.totalPrice.setText("\uD83D\uDCB0 Total: " + cart.product.price * cart.quantity + " ৳");
 
         // Fix: prepend full base URL to relative path
-        String imageUrl = "https://catchmeifyoucan.xyz/best/" + cart.product.image_path;
+        String imageUrl = "https://catchmeifyoucan.xyz/distributed-best/" + cart.product.image_path;
 
         Picasso.get()
                 .load(imageUrl)
@@ -75,7 +72,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             if ( !isUpdating ){
                 cart.quantity += 1;
                 notifyItemChanged(position);
-                increaseCartItem(cartList.get(position).product.product_id);
+                increaseCartItem(cartList.get(position).product.product_id, cartList.get(position).product.product_condition);
             }
         });
 
@@ -85,7 +82,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 if (cart.quantity > 1) {
                     cart.quantity -= 1;
                     notifyItemChanged(position);
-                    decreaseCartItem(cartList.get(position).product.product_id);
+                    decreaseCartItem(cartList.get(position).product.product_id, cartList.get(position).product.product_condition);
                 }
             }
         });
@@ -94,7 +91,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.delete.setOnClickListener(v -> {
             if ( !isUpdating ){
 
-                deleteCartItem(cartList.get(position).product.product_id);
+                deleteCartItem(cartList.get(position).product.product_id, cartList.get(position).product.product_condition);
 
                 cartList.remove(position);
                 notifyItemRemoved(position);
@@ -137,17 +134,18 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
     }
 
-    public void increaseCartItem(int product_id) {
+    public void increaseCartItem(int product_id, String product_condition) {
 
         try {
             isUpdating = true;
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("product_id", product_id);
+            jsonObject.put("product_condition", product_condition);
             jsonObject.put("operation", "+");
 
             RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
             Request request = new Request.Builder()
-                    .url("https://catchmeifyoucan.xyz/best/api/cart.php")
+                    .url("https://catchmeifyoucan.xyz/distributed-best/api/cart.php")
                     .patch(body)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Authorization", "Bearer " + sessionManager.getToken())
@@ -199,16 +197,17 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
     }
 
-    public void decreaseCartItem(int product_id){
+    public void decreaseCartItem(int product_id, String product_condition){
         try {
             isUpdating = true;
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("product_id", product_id);
+            jsonObject.put("product_condition", product_condition);
             jsonObject.put("operation", "-");
 
             RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
             Request request = new Request.Builder()
-                    .url("https://catchmeifyoucan.xyz/best/api/cart.php")
+                    .url("https://catchmeifyoucan.xyz/distributed-best/api/cart.php")
                     .patch(body)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Authorization", "Bearer " + sessionManager.getToken())
@@ -260,16 +259,17 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
     }
 
-    public void deleteCartItem(int product_id) {
+    public void deleteCartItem(int product_id, String product_condition) {
 
         try {
             isUpdating = true;
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("product_id", product_id);
+            jsonObject.put("product_condition", product_condition);
 
             RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
             Request request = new Request.Builder()
-                    .url("https://catchmeifyoucan.xyz/best/api/cart.php")
+                    .url("https://catchmeifyoucan.xyz/distributed-best/api/cart.php")
                     .delete(body)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Authorization", "Bearer " + sessionManager.getToken())

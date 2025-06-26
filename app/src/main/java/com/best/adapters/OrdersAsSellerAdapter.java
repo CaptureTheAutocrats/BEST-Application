@@ -36,18 +36,18 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewHolder> {
+public class OrdersAsSellerAdapter extends RecyclerView.Adapter<OrdersAsSellerAdapter.OrderViewHolder> {
 
-    private static final String API_PATH = "https://catchmeifyoucan.xyz/distributed-best/";
+
     private static final MediaType JSON = MediaType.get("application/json");
     private static final OkHttpClient client = new OkHttpClient();
 
-    private List<Order> ordertList;
-    private Context context;
-    private SessionManager sessionManager;
-    private boolean isUpdating = false;
+    private List<Order>     ordertList;
+    private Context         context;
+    private SessionManager  sessionManager;
+    private boolean         isUpdating = false;
 
-    public OrdersAdapter(List<Order> list, Context context) {
+    public OrdersAsSellerAdapter(List<Order> list, Context context) {
         this.ordertList = list;
         this.context = context;
     }
@@ -55,8 +55,8 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
     @NonNull
     @Override
     public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        sessionManager = new SessionManager(parent.getContext());
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_orders, parent, false);
+        sessionManager  = new SessionManager(parent.getContext());
+        View view       = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_orders_as_seller, parent, false);
         return new OrderViewHolder(view);
     }
 
@@ -65,12 +65,15 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
 
         Order order = ordertList.get(position);
         holder.name.setText(order.product.name);
-        holder.totalPrice.setText("\uD83D\uDCB0 Total: (x"+order.quantity+") " + order.product.price * order.quantity + " ৳");
+        holder.totalPrice.setText("\uD83D\uDCB0 Total: " + order.product.price * order.quantity + " ৳");
 
         String statusIcon = "\u2753";
         switch (order.status.toLowerCase()) {
             case "pending":
                 statusIcon = "\u23F3"; // ⏳
+                break;
+            case "confirmed":
+                statusIcon = "\uD83D\uDCE6"; // 📦
                 break;
             case "completed":
                 statusIcon = "\u2705"; // ✅
@@ -78,13 +81,17 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
             case "cancelled":
                 statusIcon = "\u274C"; // ❌
                 break;
+            case "in Box":
+                statusIcon = "\uD83D\uDCE5"; // 📥
+                break;
         }
         holder.status.setText(statusIcon + " Status: " + order.status);
-        holder.seller.setText("\uD83D\uDC68 Seller: " + order.seller.name);
-        holder.sellerId.setText("\uD83D\uDD22 Order ID: " + order.order_id);
+
+        holder.buyer.setText("\uD83D\uDC68 Buyer: " + order.buyer.name);
+        holder.buyerId.setText("\uD83D\uDD22 Buyer ID: " + order.buyer.studentId);
 
         // Fix: prepend full base URL to relative path
-        String imageUrl = API_PATH + order.product.image_path;
+        String imageUrl = "https://catchmeifyoucan.xyz/distributed-best/" + order.product.image_path;
 
         Picasso.get()
                 .load(imageUrl)
@@ -93,20 +100,25 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
                 .into(holder.imageView);
 
         // Set item click listener
-        holder.cancel.setOnClickListener(v->{
-            //Toast.makeText(v.getContext(), "Not implement yet", Toast.LENGTH_SHORT).show();
-            // TODO
-
+        holder.updateOrderStatus.setOnClickListener(v->{
+            
             PopupMenu popupMenu = new PopupMenu(context,v);
-            popupMenu.getMenu().add("Open Box");
-            popupMenu.getMenu().add("Close Box");
-            popupMenu.getMenu().add("Close Order");
+            popupMenu.getMenu().add("Cancelled");
+            popupMenu.getMenu().add("Confirmed");
+
+            if ( !order.status.equals("In Box") ){
+                popupMenu.getMenu().add("Open Box");
+                popupMenu.getMenu().add("Close Box");
+                popupMenu.getMenu().add("In Box");
+            }
+
 
             popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem menuItem) {
 
                     String status = menuItem.getTitle().toString();
+                    //Toast.makeText(context, title + " selected", Toast.LENGTH_SHORT).show();
 
                     if ( status.equals("Open Box") ){
 
@@ -192,12 +204,12 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
 
                     }
 
-                    else if ( status.equals("Close Order") ){
+                    else {
                         try {
                             isUpdating = true;
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put("order_id", order.order_id);
-                            jsonObject.put("status",  "Completed");
+                            jsonObject.put("status", status);
 
                             RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
                             Request request = new Request.Builder()
@@ -229,16 +241,14 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
                                                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
                                             });
                                             isUpdating = false;
-                                        }
-                                        catch (Exception e) {
+                                        } catch (Exception e) {
                                             new Handler(Looper.getMainLooper()).post(() -> {
                                                 Toast.makeText(context, "Invalid response" + e.toString(), Toast.LENGTH_SHORT).show();
-                                                Log.d("Orders Adapter", responseBody);
+                                                Log.d("OrderAsSeller Adapter", responseBody);
                                             });
                                             isUpdating = false;
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         new Handler(Looper.getMainLooper()).post(() -> {
                                             Toast.makeText(context, "Server error" + responseBody, Toast.LENGTH_SHORT).show();
                                         });
@@ -270,25 +280,25 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
 
-        TextView name;
-        TextView  unitPrice;
-        TextView  condition;
-        TextView  totalPrice;
-        TextView  status;
-        TextView  seller;
-        TextView  sellerId;
-        ImageView imageView;
-        ImageButton cancel;
+        TextView    name;
+        TextView    unitPrice;
+        TextView    condition;
+        TextView    totalPrice;
+        TextView    status;
+        TextView    buyer;
+        TextView    buyerId;
+        ImageView   imageView;
+        ImageButton updateOrderStatus;
 
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
-            name        = itemView.findViewById(R.id.OrderTxtName);
-            imageView   = itemView.findViewById(R.id.OrderImageProduct);
-            totalPrice  = itemView.findViewById(R.id.OrderTxtTotalPrice);
-            status      = itemView.findViewById(R.id.OrderTxtStatus);
-            seller      = itemView.findViewById(R.id.OrderTxtSeller);
-            sellerId    = itemView.findViewById(R.id.OrderTxtSellerId);
-            cancel      = itemView.findViewById(R.id.OrderBtnCancel);
+            name                = itemView.findViewById(R.id.OrderAsSellerTxtName);
+            imageView           = itemView.findViewById(R.id.OrderAsSellerImageProduct);
+            totalPrice          = itemView.findViewById(R.id.OrderAsSellerTxtTotalPrice);
+            status              = itemView.findViewById(R.id.OrderAsSellerTxtStatus);
+            buyer               = itemView.findViewById(R.id.OrderTxtBuyer);
+            buyerId             = itemView.findViewById(R.id.OrderTxtBuyerId);
+            updateOrderStatus   = itemView.findViewById(R.id.OrderAsSellerButtonUpdateOrderStatus);
         }
     }
 

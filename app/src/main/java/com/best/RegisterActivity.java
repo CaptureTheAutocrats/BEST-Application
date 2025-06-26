@@ -4,13 +4,12 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.EditText;
+import android.util.Patterns;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
 import java.io.IOException;
-import java.time.ZoneId;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -18,13 +17,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import android.content.Intent;
-import android.os.Bundle;
+
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
@@ -40,7 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputLayout tilPassword;
     private TextInputLayout tilConfirmPassword;
     private TextInputEditText etUsername;
-    private TextInputEditText etEmail;
+    private TextInputEditText etPhoneNumber;
     private TextInputEditText etStudentId;
     private TextInputEditText etPassword;
     private TextInputEditText etConfirmPassword;
@@ -49,7 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
     private CircularProgressIndicator progressIndicator;
 
     private final OkHttpClient client        = new OkHttpClient();
-    private static final String REGISTER_URL = "https://catchmeifyoucan.xyz/best/api/register.php";
+    private static final String REGISTER_URL = "https://catchmeifyoucan.xyz/distributed-best/api/register.php";
     private static final MediaType JSON      = MediaType.get("application/json; charset=utf-8");
 
     private SessionManager sessionManager;
@@ -59,6 +56,9 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
 
         sessionManager = new SessionManager(this);
 
@@ -74,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity {
         tilConfirmPassword  = findViewById(R.id.tilConfirmPassword);
 
         etUsername          = findViewById(R.id.etUsername);
-        etEmail             = findViewById(R.id.etEmail);
+        etPhoneNumber = findViewById(R.id.etEmail);
         etStudentId         = findViewById(R.id.etStudentId);
         etPassword          = findViewById(R.id.etPassword);
         etConfirmPassword   = findViewById(R.id.etConfirmPassword);
@@ -101,8 +101,8 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private boolean isValidEmail(String email) {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    private boolean isValidPhoneNumber(String phoneNumber) {
+        return Patterns.PHONE.matcher(phoneNumber).matches();
     }
 
     private void validateAndSignup() {
@@ -115,7 +115,7 @@ public class RegisterActivity extends AppCompatActivity {
         tilConfirmPassword.setError(null);
 
         String username         = etUsername.getText().toString().trim();
-        String email            = etEmail.getText().toString().trim();
+        String phoneNumber      = etPhoneNumber.getText().toString().trim();
         String studentId        = etStudentId.getText().toString().trim();
         String password         = etPassword.getText().toString().trim();
         String confirmPassword  = etConfirmPassword.getText().toString().trim();
@@ -129,12 +129,12 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        if (TextUtils.isEmpty(email)) {
-            tilEmail.setError("Email is required");
+        if (TextUtils.isEmpty(phoneNumber)) {
+            tilEmail.setError("Phone number is required");
             return;
         }
-        else if (!isValidEmail(email)) {
-            tilEmail.setError("Enter a valid email address");
+        else if (!isValidPhoneNumber(phoneNumber)) {
+            tilEmail.setError("Enter a valid phone number");
             return;
         }
 
@@ -169,7 +169,7 @@ public class RegisterActivity extends AppCompatActivity {
         try {
             JSONObject json = new JSONObject();
             json.put("name", username);
-            json.put("email", email);
+            json.put("phone_number", phoneNumber);
             json.put("password", password);
             json.put("student_id", studentId);
 
@@ -198,9 +198,10 @@ public class RegisterActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         try {
                             JSONObject resJson      = new JSONObject(res);
+                            int user_id  = resJson.getInt("user_id");
                             String token            = resJson.getString("token");
                             long   tokenExpiresAt   = resJson.getLong("tokenExpiresAt");
-                            sessionManager.saveToken(token, tokenExpiresAt);
+                            sessionManager.saveToken(user_id,token, tokenExpiresAt);
 
                             runOnUiThread(() -> {
                                 Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();

@@ -41,6 +41,7 @@ public class AddProductFragment extends Fragment {
     CircularProgressIndicator progressIndicator;
     View        view;
 
+    private final String API_URL = "https://catchmeifyoucan.xyz/distributed-best/api/add-product.php";
     SessionManager sessionManager;
     public AddProductFragment() {}
 
@@ -147,7 +148,7 @@ public class AddProductFragment extends Fragment {
         OkHttpClient client =  getOkHttpClient();
         RequestBody  body   = RequestBody.create(json.toString(), MediaType.parse("application/json"));
         Request request = new Request.Builder()
-                .url("https://catchmeifyoucan.xyz/best/api/add-product.php")
+                .url(API_URL)
                 .addHeader("Authorization", "Bearer " + sessionManager.getToken())
                 .post(body)
                 .build();

@@ -15,15 +15,19 @@
         android:icon="@drawable/ic_nav_orders"
         android:title="Orders" />
 
+    <item
+        android:id="@+id/nav_orders_as_seller"
+        android:icon="@drawable/ic_nav_orders"
+        android:title="Orders(Seller)" />
 
     <item
         android:id="@+id/nav_add"
         android:icon="@android:drawable/ic_input_add"
         android:title="Add" />
 
-    <item
-        android:id="@+id/nav_profile"
-        android:icon="@drawable/ic_person"
-        android:title="Profile" />
+<!--    <item-->
+<!--        android:id="@+id/nav_profile"-->
+<!--        android:icon="@drawable/ic_person"-->
+<!--        android:title="Profile" />-->
 
 </menu>

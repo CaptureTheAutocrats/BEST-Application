@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.best.Global;
 import com.best.LoginActivity;
 import com.best.MainActivity;
 import com.best.R;
@@ -34,9 +35,10 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout;
 
 
-    private final OkHttpClient client       = new OkHttpClient();
-    private static final String CART_URL   = "https://catchmeifyoucan.xyz/best/api/cart.php";
-    private static final MediaType JSON     = MediaType.get("application/json; charset=utf-8");
+    private final OkHttpClient client               = new OkHttpClient();
+    private static final String API_URL_PRODUCTS    = "https://catchmeifyoucan.xyz/distributed-best/api/products.php";
+    private static final String API_URL_CART        = "https://catchmeifyoucan.xyz/distributed-best/api/cart.php";
+    private static final MediaType JSON             = MediaType.get("application/json; charset=utf-8");
     private SessionManager sessionManager;
 
     private boolean isLoading = false;
@@ -61,7 +63,6 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-
                 GridLayoutManager layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
                 if (!isLoading && layoutManager != null && layoutManager.findLastVisibleItemPosition() >= productList.size() - 1) {
                     isLoading = true;
@@ -93,7 +94,9 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
 
         isLoading = true;
         Request request = new Request.Builder()
-                .url("https://catchmeifyoucan.xyz/best/api/products.php?page=" + page + "&limit=" + limit)
+                .url(API_URL_PRODUCTS+ "?page=" + page + "&limit=" + limit + "&show_my_products=" + Global.show_my_products)
+                .addHeader("Authorization", "Bearer " + sessionManager.getToken())
+                .addHeader("IsAsSeller", "true")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -106,21 +109,23 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
             @Override public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        String responseStr = response.body().string();
-                        JSONArray jsonArray = new JSONArray(responseStr);
+                        String      responseStr = response.body().string();
+                        Log.d("ProductsFragment", responseStr);
+                        JSONArray   jsonArray   = new JSONArray(responseStr);
 
                         List<Product> newProducts = new ArrayList<>();
 
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject productJsonObject = jsonArray.getJSONObject(i);
-                            Product product = new Product();
-                            product.product_id = productJsonObject.getInt("product_id");
-                            product.name = productJsonObject.getString("name");
-                            product.description = productJsonObject.getString("description");
-                            product.price = productJsonObject.getInt("price");
-                            product.product_condition = productJsonObject.getString("product_condition");
-                            product.stock = productJsonObject.getInt("stock");
-                            product.image_path = productJsonObject.getString("image_path");
+                            Product product             = new Product();
+                            product.product_id          = productJsonObject.getInt("product_id");
+                            product.user_id             = productJsonObject.getInt("user_id");
+                            product.name                = productJsonObject.getString("name");
+                            product.description         = productJsonObject.getString("description");
+                            product.price               = productJsonObject.getInt("price");
+                            product.product_condition   = productJsonObject.getString("product_condition");
+                            product.stock               = productJsonObject.getInt("stock");
+                            product.image_path          = productJsonObject.getString("image_path");
                             newProducts.add(product);
                         }
 
@@ -133,6 +138,7 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
 
                     } catch (Exception e) {
                         e.printStackTrace();
+                        Log.d("ProductsFragment", e.toString());
                         isLoading = false;
                         swipeRefreshLayout.setRefreshing(false); // Hide the refresh spinner on failure
                     }
@@ -149,15 +155,22 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
     public void onItemClick(View view, Product product) {
 
         if ( view.getId() == R.id.btnAddToCart ){
+
+            if ( product.user_id == sessionManager.getUserId() ){
+                Toast.makeText(getContext(), "You can't buy your own product!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             try {
 
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("product_id", product.product_id);
-                jsonObject.put("quantity", 1);
+                jsonObject.put("product_id",        product.product_id);
+                jsonObject.put("product_condition", product.product_condition);
+                jsonObject.put("quantity",1);
 
                 RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
                 Request request = new Request.Builder()
-                        .url("https://catchmeifyoucan.xyz/best/api/cart.php")
+                        .url(API_URL_CART)
                         .post(body)
                         .addHeader("Content-Type", "application/json")
                         .addHeader("Authorization", "Bearer " + sessionManager.getToken())

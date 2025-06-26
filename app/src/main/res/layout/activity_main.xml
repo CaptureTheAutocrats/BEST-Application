@@ -5,7 +5,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <LinearLayout
+        android:id="@+id/product_filter_layout"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioGroup
+            android:id="@+id/product_filter_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radio_other_products"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other Products"
+                android:checked="true"
+                />
+
+            <RadioButton
+                android:id="@+id/radio_my_products"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="My Products"
+                android:checked="false" />
+
+        </RadioGroup>
+    </LinearLayout>
+
     <FrameLayout
+        android:layout_marginTop="25dp"
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

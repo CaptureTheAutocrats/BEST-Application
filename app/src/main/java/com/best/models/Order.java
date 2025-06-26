@@ -1,6 +1,10 @@
 package com.best.models;
 
-public class Order {
+import android.hardware.usb.UsbRequest;
+
+import java.io.Serializable;
+
+public class Order implements Serializable {
     public int order_id;
     public int buyer_id;
     public int seller_id;
@@ -9,8 +13,9 @@ public class Order {
     public int total_amount;
     public String status;
     public String box_id;
-    public String pickup_code;
     public String created_at;
     public String updated_at;
     public Product product;
+    public User seller;
+    public User buyer;
 }

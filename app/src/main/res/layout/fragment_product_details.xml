@@ -83,18 +83,52 @@
             android:textColor="@android:color/black"
             android:textSize="14sp" />
 
-        <!-- Add to Cart Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddToCart"
-            app:cornerRadius="8dp"
-            app:icon="@android:drawable/ic_input_add"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
+        <!-- Separator Line -->
+        <View
             android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="16dp"
+            android:background="?android:attr/listDivider" />
+
+        <!-- Seller -->
+        <TextView
+            android:visibility="visible"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="Add to Cart"
-            android:textSize="16sp" />
+            android:text="From"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <!-- Seller Name -->
+        <TextView
+            android:visibility="invisible"
+            android:id="@+id/txtProductSellerName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <!-- Seller ID -->
+        <TextView
+            android:visibility="invisible"
+            android:id="@+id/txtProductSellerId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <!-- Seller Phone Number -->
+        <TextView
+            android:visibility="invisible"
+            android:id="@+id/txtProductSellerPhoneNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
 
         <!-- Separator Line -->
         <View
@@ -102,6 +136,7 @@
             android:layout_height="1dp"
             android:layout_marginBottom="16dp"
             android:background="?android:attr/listDivider" />
+
 
     </LinearLayout>
 

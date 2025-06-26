@@ -3,6 +3,7 @@ package com.best;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,13 +38,18 @@ public class LoginActivity extends AppCompatActivity {
     private SessionManager sessionManager;
 
     private final OkHttpClient client       = new OkHttpClient();
-    private static final String LOGIN_URL   = "https://catchmeifyoucan.xyz/best/api/login.php";
+    private static final String LOGIN_URL   = "https://catchmeifyoucan.xyz/distributed-best/api/login.php";
     private static final MediaType JSON     = MediaType.get("application/json; charset=utf-8");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
 
         sessionManager = new SessionManager(this);
         if ( sessionManager.getToken() != null ){
@@ -92,8 +98,8 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private boolean isValidEmail(String email) {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    private boolean isValidPhoneNumber(String phoneNumber) {
+        return Patterns.PHONE.matcher(phoneNumber).matches();
     }
 
     private void validateAndLogin() {
@@ -102,14 +108,14 @@ public class LoginActivity extends AppCompatActivity {
         tilEmail.setError(null);
         tilPassword.setError(null);
 
-        String email    = etEmail.getText().toString().trim();
+        String phone_number    = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-        if (TextUtils.isEmpty(email)) {
-            tilEmail.setError("Email is required");
+        if (TextUtils.isEmpty(phone_number)) {
+            tilEmail.setError("Phone number is required");
             return;
-        } else if (!isValidEmail(email)) {
-            tilEmail.setError("Enter a valid email address");
+        } else if (!isValidPhoneNumber(phone_number)) {
+            tilEmail.setError("Enter a valid phone number");
             return;
         }
 
@@ -126,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
         try {
 
             JSONObject json = new JSONObject();
-            json.put("email", email);
+            json.put("phone_number", phone_number);
             json.put("password", password);
 
             RequestBody body = RequestBody.create(json.toString(), JSON);
@@ -158,9 +164,10 @@ public class LoginActivity extends AppCompatActivity {
                         try {
 
                             JSONObject resJson          = new JSONObject(responseBody);
+                            int         user_id         = resJson.getInt("user_id");
                             String      token           = resJson.getString("token");
                             long        tokenExpiresAt  = resJson.getLong("tokenExpiresAt");
-                            sessionManager.saveToken(token, tokenExpiresAt);
+                            sessionManager.saveToken(user_id, token, tokenExpiresAt);
 
                             runOnUiThread(() -> {
                                 Toast.makeText(LoginActivity.this, "Login Success", Toast.LENGTH_SHORT).show();

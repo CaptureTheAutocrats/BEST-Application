@@ -49,6 +49,7 @@ public class CartFragment extends Fragment {
     private SessionManager sessionManager;
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout;
     private static final MediaType JSON = MediaType.get("application/json");
+    private static final String API_URL = "https://catchmeifyoucan.xyz/distributed-best/api/cart.php";
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -86,7 +87,7 @@ public class CartFragment extends Fragment {
         swipeRefreshLayout.setRefreshing(true);
 
         Request request = new Request.Builder()
-                .url("https://catchmeifyoucan.xyz/best/api/cart.php")
+                .url(API_URL)
                 .addHeader("Authorization", "Bearer " + sessionManager.getToken())
                 .build();
 
@@ -155,7 +156,7 @@ public class CartFragment extends Fragment {
 
         if ( cartList.size() <= 0 ){
             requireActivity().runOnUiThread(()->{
-                Toast.makeText(getContext(), "Add items to cart before oreder", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Add items to cart before order", Toast.LENGTH_SHORT).show();
             });
             return;
         }
@@ -172,7 +173,7 @@ public class CartFragment extends Fragment {
                     JSONObject jsonObject = new JSONObject();
                     RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
                     Request request = new Request.Builder()
-                            .url("https://catchmeifyoucan.xyz/best/api/orders.php")
+                            .url("https://catchmeifyoucan.xyz/distributed-best/api/orders.php")
                             .post(body)
                             .addHeader("Content-Type", "application/json")
                             .addHeader("Authorization", "Bearer " + sessionManager.getToken())
@@ -184,6 +185,7 @@ public class CartFragment extends Fragment {
                         public void onFailure(Call call, IOException e) {
                             requireActivity().runOnUiThread(()->{
                                 Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                                Log.d("Cart Fragment", e.toString());
                             });
                         }
 
@@ -205,6 +207,8 @@ public class CartFragment extends Fragment {
                                 catch (Exception e) {
                                     requireActivity().runOnUiThread(()->{
                                         Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                                        Log.e("Cart Fragment", e.toString());
+                                        Log.e("Cart Fragment", responseBody.toString());
                                     });
                                 }
                             }
@@ -220,6 +224,7 @@ public class CartFragment extends Fragment {
                 } catch (Exception e) {
                     requireActivity().runOnUiThread(()->{
                         Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                        Log.d("Cart Fragment", e.toString());
                     });
                 }
             }
@@ -230,8 +235,8 @@ public class CartFragment extends Fragment {
     private void openOrderFragment() {
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).switchFragment(R.id.nav_orders);
-            BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_nav);
-            bottomNav.setSelectedItemId(R.id.nav_orders);
+//            BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_nav);
+//            bottomNav.setSelectedItemId(R.id.nav_orders);
         }
     }
 
