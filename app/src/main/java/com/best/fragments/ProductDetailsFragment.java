@@ -1,5 +1,6 @@
 package com.best.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ import com.best.models.Product;
 import com.google.android.material.button.MaterialButton;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -44,6 +46,7 @@ public class ProductDetailsFragment extends Fragment {
     private TextView txtProductSellerName;
     private TextView txtProductSellerId;
     private TextView txtProductSellerPhoneNumber;
+    private TextView btnRemoveProduct;
 
     private Product product;
 
@@ -80,14 +83,19 @@ public class ProductDetailsFragment extends Fragment {
         txtProductSellerName        = view.findViewById(R.id.txtProductSellerName);
         txtProductSellerId          = view.findViewById(R.id.txtProductSellerId);
         txtProductSellerPhoneNumber = view.findViewById(R.id.txtProductSellerPhoneNumber);
+        btnRemoveProduct            = view.findViewById(R.id.remove_product_button_id);
+
+        if ( product.user_id != sessionManager.getUserId() ){
+            btnRemoveProduct.setVisibility(View.GONE);
+        }
 
         if (product != null) {
+
             txtProductName.setText(product.name);
             txtProductDescription.setText(product.description);
             txtProductPrice.setText("Price: " + product.price + " BDT");
             txtProductCondition.setText("Condition: " + product.product_condition);
             txtProductStock.setText("Stock: " + product.stock);
-
 
             try {
 
@@ -130,9 +138,9 @@ public class ProductDetailsFragment extends Fragment {
                                 });
                             }
                             catch (Exception e) {
-                                requireActivity().runOnUiThread(()->{
-                                    Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                                });
+//                                requireActivity().runOnUiThread(()->{
+//                                    Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+//                                });
                             }
                         }
                         else {
@@ -160,5 +168,79 @@ public class ProductDetailsFragment extends Fragment {
                     .into(productImage);
 
         }
+
+        btnRemoveProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                new AlertDialog.Builder(requireContext())
+                    .setTitle("Remove Product")
+                    .setMessage("Are you sure you want to remove this product?")
+
+                    .setPositiveButton("No", (dialog, which) -> {
+                        dialog.dismiss();
+                    })
+                    .setNeutralButton("Yes", (dialog, which) -> {
+
+                        try {
+
+                            JSONObject json = new JSONObject();
+                            json.put("product_id", product.product_id);
+                            json.put("product_condition", product.product_condition);
+
+                            RequestBody  body   = RequestBody.create(json.toString(), MediaType.parse("application/json"));
+                            Request request = new Request.Builder()
+                                    .url("https://catchmeifyoucan.xyz/distributed-best/api/remove-product.php")
+                                    .addHeader("Authorization", "Bearer " + sessionManager.getToken())
+                                    .post(body)
+                                    .build();
+
+                            client.newCall(request).enqueue(new Callback() {
+
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    requireActivity().runOnUiThread(()->{
+                                        Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                                    });
+                                }
+
+                                @Override
+                                public void onResponse(Call call, Response response) throws IOException {
+
+                                    try {
+                                        String responseBody = response.body().string();
+                                        JSONObject jsonObject = new JSONObject(responseBody);
+                                        String message = jsonObject.getString("message");
+
+                                        if (response.isSuccessful()) {
+                                            requireActivity().runOnUiThread(()->{
+                                                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                                                requireActivity().getSupportFragmentManager().popBackStack();
+                                            });
+                                        }
+                                        else {
+                                            requireActivity().runOnUiThread(()->{
+                                                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                                            });
+                                        }
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+
+                        }
+                        catch (Exception e) {
+                            requireActivity().runOnUiThread(()->{
+                                Toast.makeText(getContext(), e.toString(), Toast.LENGTH_SHORT).show();
+                            });
+                        }
+
+
+                    })
+                    .show();
+
+            }
+        });
     }
 }

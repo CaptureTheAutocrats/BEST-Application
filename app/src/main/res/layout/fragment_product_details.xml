@@ -137,6 +137,12 @@
             android:layout_marginBottom="16dp"
             android:background="?android:attr/listDivider" />
 
+        <Button
+            android:id="@+id/remove_product_button_id"
+            android:text="Remove Product"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+
 
     </LinearLayout>
 

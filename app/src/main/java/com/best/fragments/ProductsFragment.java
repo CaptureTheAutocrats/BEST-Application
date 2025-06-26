@@ -110,7 +110,7 @@ public class ProductsFragment extends Fragment implements ProductAdapter.OnItemC
                 if (response.isSuccessful()) {
                     try {
                         String      responseStr = response.body().string();
-                        Log.d("ProductsFragment", responseStr);
+//                        Log.d("ProductsFragment", responseStr);
                         JSONArray   jsonArray   = new JSONArray(responseStr);
 
                         List<Product> newProducts = new ArrayList<>();
