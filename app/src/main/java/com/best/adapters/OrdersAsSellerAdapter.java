@@ -108,10 +108,8 @@ public class OrdersAsSellerAdapter extends RecyclerView.Adapter<OrdersAsSellerAd
 
             if ( !order.status.equals("In Box") ){
                 popupMenu.getMenu().add("Open Box");
-                popupMenu.getMenu().add("Close Box");
                 popupMenu.getMenu().add("In Box");
             }
-
 
             popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
@@ -124,14 +122,14 @@ public class OrdersAsSellerAdapter extends RecyclerView.Adapter<OrdersAsSellerAd
 
                         try {
                             JSONObject json = new JSONObject();
-                            json.put("value", "lock"); // or "lock"
+                            json.put("value", "unlock"); // or "lock"
 
                             RequestBody body = RequestBody.create(json.toString(), JSON);
                             Request request = new Request.Builder()
                                     .url("https://io.adafruit.com/api/v2/mrhbijoy/feeds/lock-command/data")
                                     .post(body)
                                     .addHeader("Content-Type", "application/json")
-                                    .addHeader("X-AIO-Key", "aio_LfVs259yP2mxEtlA0QmksC1zwYbD")
+                                    .addHeader("X-AIO-Key", "aio_ELIW35XmVaMzcBnQCLOG7p4cPtTi")
                                     .build();
 
                             client.newCall(request).enqueue(new Callback() {
@@ -158,48 +156,7 @@ public class OrdersAsSellerAdapter extends RecyclerView.Adapter<OrdersAsSellerAd
                         }catch (Exception e){
                             e.printStackTrace();
                             Log.d("Orders ", e.toString() );
-                        }
-
-                    }
-
-                    else if ( status.equals("Close Box") ){
-
-                        try {
-                            JSONObject json = new JSONObject();
-                            json.put("value", "unlock"); // or "unlock"
-
-                            RequestBody body = RequestBody.create(json.toString(), JSON);
-                            Request request = new Request.Builder()
-                                    .url("https://io.adafruit.com/api/v2/mrhbijoy/feeds/lock-command/data")
-                                    .post(body)
-                                    .addHeader("Content-Type", "application/json")
-                                    .addHeader("X-AIO-Key", "aio_LfVs259yP2mxEtlA0QmksC1zwYbD")
-                                    .build();
-
-                            client.newCall(request).enqueue(new Callback() {
-                                @Override
-                                public void onFailure(Call call, IOException e) {
-                                    new Handler(Looper.getMainLooper()).post(() ->
-                                            Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                                    );
-                                }
-
-                                @Override
-                                public void onResponse(Call call, Response response) throws IOException {
-                                    String responseBody = response.body().string();
-                                    new Handler(Looper.getMainLooper()).post(() -> {
-                                        if (response.isSuccessful()) {
-                                            Toast.makeText(context, "Command sent successfully!", Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            Toast.makeText(context, "Failed: " + responseBody, Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }
-                            });
-
-                        }catch (Exception e){
-                            e.printStackTrace();
-                            Log.d("Orders ", e.toString() );
+                            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
                         }
 
                     }

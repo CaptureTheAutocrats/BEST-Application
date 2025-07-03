@@ -127,8 +127,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
-
-
     <LinearLayout
         android:id="@+id/llSignUp"
         android:layout_width="wrap_content"

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
@@ -26,9 +25,9 @@ import com.google.android.material.textfield.TextInputLayout;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private TextInputLayout tilEmail;
+    private TextInputLayout tilPhoneNumber;
     private TextInputLayout tilPassword;
-    private TextInputEditText etEmail;
+    private TextInputEditText etPhoneNumber;
     private TextInputEditText etPassword;
     private MaterialButton btnLogin;
     private TextView tvForgotPassword;
@@ -62,9 +61,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        tilEmail            = findViewById(R.id.tilEmail);
+        tilPhoneNumber = findViewById(R.id.tilEmail);
         tilPassword         = findViewById(R.id.tilPassword);
-        etEmail             = findViewById(R.id.etEmail);
+        etPhoneNumber = findViewById(R.id.etEmail);
         etPassword          = findViewById(R.id.etPassword);
         btnLogin            = findViewById(R.id.btnLogin);
         tvForgotPassword    = findViewById(R.id.tvForgotPassword);
@@ -105,17 +104,17 @@ public class LoginActivity extends AppCompatActivity {
     private void validateAndLogin() {
 
         // Reset errors
-        tilEmail.setError(null);
+        tilPhoneNumber.setError(null);
         tilPassword.setError(null);
 
-        String phone_number    = etEmail.getText().toString().trim();
+        String phone_number    = etPhoneNumber.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
         if (TextUtils.isEmpty(phone_number)) {
-            tilEmail.setError("Phone number is required");
+            tilPhoneNumber.setError("Phone number is required");
             return;
         } else if (!isValidPhoneNumber(phone_number)) {
-            tilEmail.setError("Enter a valid phone number");
+            tilPhoneNumber.setError("Enter a valid phone number");
             return;
         }
 
@@ -204,6 +203,5 @@ public class LoginActivity extends AppCompatActivity {
         }
 
     }
-
 
 }
